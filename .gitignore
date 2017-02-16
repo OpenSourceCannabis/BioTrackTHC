@@ -7,3 +7,7 @@
 /pkg/
 /spec/reports/
 /tmp/
+
+BIOTRACK_CREDENTIALS.md
+
+CONSOLE_REPLAY.md

@@ -4,15 +4,18 @@
 
 ```ruby
 BioTrackTHC.configure do |config|
-  config.username = 'info@sdpharmlabs.com'
-  config.password = 'VVTE4Ykyh7oVDg'
-  config.license = '980000225'
+  config.username = ''
+  config.password = ''
+  config.license = ''
   config.base_uri = 'https://wslcb.mjtraceability.com'
-  config.results = []
 end
 
-client = BioTrackTHC::Client.new
-client.search('7265877419094151')
+client = BioTrackTHC::Client.new(debug: true)
+
+client.sample_search('0199 2612 0934 4923')
+client.parsed_response
+
+client.license_search('980221')
 ```
 
 ## License
