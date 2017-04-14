@@ -1,4 +1,7 @@
 module BioTrackTHC
+  include Constants
+  include Errors
+
   class Client
     attr_accessor :agent, :debug, :response, :parsed_response
     def initialize(opts = {})
@@ -34,8 +37,7 @@ module BioTrackTHC
         end
       end
       if response =~ /myaddreceive/
-        # parse_search_response
-        true
+        parse_search_response
       else
         false
       end
@@ -44,31 +46,46 @@ module BioTrackTHC
     private
 
     def parse_search_response
-      self.parsed_response = {}
+      self.parsed_response = []
       _html = Nokogiri::HTML(response)
-      if _button = _html.css('input#button-0')
-        parsed_response[:action] = _button.first.attributes['value'].value
-        parsed_response[:onclick] = _button.first.attributes['onclick'].value
-      end
-      # .ui-block-a..e are the div on chunk of decoded HTML
-      %w(b c d e).each do |z|
-        element = _html.css(".ui-block-#{z}").css('.ui-bar-e')
-        # this is the LOT / BATCH
-        if element.children.count == 4
-          [1,3].each do |i|
-            key, value = element.children[i].text.split(': ')
-            parsed_response[key.downcase.gsub(/\s+/, '_').to_sym] = value.strip
-          end
-        else
-          key = element[0].text
-          value = element[1].text
-          parsed_response[key.downcase.to_sym] = value
+      sample_count = _html.css(ResponsePage::BUTTON_RECEIVE).count
+      0.upto(sample_count-1) do |idx|
+        _sample_data = {}
+        interpolated_receive_btn =
+          ResponsePage::BUTTON_RECEIVE_IDX.gsub(/IDX/, "#{idx}")
+        if _button = _html.css(interpolated_receive_btn)
+          _sample_data[:action] = _button.first.attributes['value'].value
+          _sample_data[:onclick] = _button.first.attributes['onclick'].value
         end
+        nth_of_type = ":nth-of-type(#{idx + ResponsePage::DATA_OFFSET})"
+        ResponsePage::UI_ELEMENTS.each do |ui_element|
+          element =
+            _html
+              .css(
+                ResponsePage::UI_ELEMENT_IDX.gsub(/IDX/, ui_element) +
+                nth_of_type
+              )
+              .css(ResponsePage::DATA_ELEMENT)
+          next unless element
+          if is_lot_batch?(element)
+            [
+              ResponsePage::SAMPLE_ID_OFFSET,
+              ResponsePage::LOT_ID_OFFSET
+            ].each do |offset|
+              key, value = element.children[offset].text.split(': ')
+              _sample_data[key.downcase.gsub(/\s+/, '_').to_sym] = value.strip
+            end
+          else
+            _sample_data[ResponsePage::SAMPLE_ATTR[z].to_sym] = element[0].text
+          end
+        end
+        parsed_response << _sample_data
       end
-      true
+      sample_count
     end
 
     def sign_in
+      raise Errors::MissingConfiguration if configuration.incomplete?
       agent.get(configuration.base_uri + BioTrackTHC::LOGIN_PAGE) do |wslcb_page|
         _response = wslcb_page.form_with(name: 'clogin', method: 'POST') do |form|
           form.username  = configuration.username
@@ -78,6 +95,10 @@ module BioTrackTHC
         end.submit
         puts _response if debug
       end
+    end
+
+    def is_lot_batch?(el)
+      el.children.count == ResponsePage::LOT_BATCH_COLUMN_COUNT
     end
 
     def configuration

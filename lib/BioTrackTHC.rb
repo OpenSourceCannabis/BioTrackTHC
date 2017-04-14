@@ -1,4 +1,7 @@
 require 'mechanize'
+require 'pry'
+require 'BioTrackTHC/constants'
+require 'BioTrackTHC/errors'
 require 'BioTrackTHC/configuration'
 require 'BioTrackTHC/client'
 require "BioTrackTHC/version"
