@@ -3,7 +3,8 @@ module BioTrackTHC
     module ResponsePage
       SAMPLE_ATTR = { 'c' => 'date', 'd' => 'product', 'e' => 'quantity' }
       BUTTON_RECEIVE = 'input[value="Receive Sample"]'
-      BUTTON_RECEIVE_IDX = 'input#button-IDX'
+      BUTTON_RESULTS = 'input[value="Add Results"]'
+      BUTTON_ACTION_IDX = 'input#button-IDX'
       UI_ELEMENTS = ('b'..'e')
       LOT_BATCH_COLUMN_COUNT = 3
       UI_ELEMENT_IDX = '.ui-block-IDX'
