@@ -3,7 +3,7 @@ module BioTrackTHC
   include Errors
 
   class Client
-    attr_accessor :agent, :debug, :response, :parsed_response
+    attr_accessor :agent, :debug, :response, :parsed_response, :licensees
     def initialize(opts = {})
       self.agent = Mechanize.new { |agent| agent.follow_meta_refresh = true }
       self.agent.user_agent_alias = 'Windows IE 9'
@@ -40,6 +40,13 @@ module BioTrackTHC
         parse_search_response
       else
         false
+      end
+    end
+
+    def licensee_search(query)
+      agent.get("#{configuration.base_uri}#{BioTrackTHC::LICENSEE_SEARCH}#{query}") do |response|
+        self.licensees = JSON.parse(response.body)['items']
+        licensees.any?
       end
     end
 
