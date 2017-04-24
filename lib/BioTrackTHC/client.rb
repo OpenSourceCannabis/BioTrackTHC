@@ -55,7 +55,7 @@ module BioTrackTHC
       sample_search(sample_id) unless sample_available?(sample_id)
       _sample =
         parsed_response
-          .find{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'')}
+          .find{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Receive Sample' }
       if _sample
         agent.get("#{configuration.base_uri}#{BioTrackTHC::RECEIVE_PAGE}#{_sample[:id]}") do |page|
           _response = page.form_with(name: 'addlicensee', method: 'POST') do |form|
@@ -67,6 +67,73 @@ module BioTrackTHC
         end
       else
         puts "#{sample_id} not found" if debug
+      end
+    end
+
+    def create_results(sample_id, results = {})
+      sample_search(sample_id) unless sample_available?(sample_id)
+      _sample =
+        parsed_response
+          .find{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Add Results'}
+      if _sample
+        agent.get("#{configuration.base_uri}#{BioTrackTHC::CREATE_RESULTS}#{_sample[:id]}") do |page|
+          _response = page.form_with(name: 'addlicensee', method: 'POST') do |form|
+            fields = form.fields.map(&:name)
+            form.id = _sample[:id]
+            form.submit = 1
+            form.page1_moisture = results[:b_moisture] if fields.index('page1_moisture')
+            form.page2_THC = results[:c_thc] if fields.index('page2_THC')
+            form.page2_THCA = results[:c_thca] if fields.index('page2_THCA')
+            form.total_thc = results[:c_thc] + (0.877 * results[:c_thca]) if fields.index('total_thc')
+            form.page2_CBD = results[:c_cbd] if fields.index('page2_CBD')
+            form.page2_CBDA = results[:c_cbda] if fields.index('page2_CBDA')
+            form.total_cbd = results[:c_cbd] + (0.877 * results[:c_cbda]) if fields.index('total_cbd')
+            form.send(:'page2_Total Cannabinoids', form.total_thc + form.total_cbd) if fields.index('page2_Total Cannabinoids')
+            form.page3_Stems = results[:v_stems] if fields.index('page3_Stems')
+            form.page3_Other = results[:v_other] if fields.index('page3_Other')
+            form.page4_aerobic_bacteria = results[:m_aerobic_count] if fields.index('page4_aerobic_bacteria')
+            form.page4_yeast_and_mold = results[:m_yeast_mold] if fields.index('page4_yeast_and_mold')
+            form.page4_coliforms = results[:m_total_coliform] if fields.index('page4_coliforms')
+            form.page4_bile_tolerant = results[:m_btgn_bacteria] if fields.index('page4_bile_tolerant')
+            form.page4_e_coli_and_salmonella = results[:m_ecoli] + results[:m_salmonella] if fields.index('page4_e_coli_and_salmonella')
+            form.page6_total_mycotoxins = results[:mycotoxins_pass] if fields.index('page6_total_mycotoxins')
+            form.sample_amount_destroyed = form.sample_amount_used.to_f / 100 * results[:amount_destroyed_pct] if fields.index('sample_amount_destroyed')
+            form.sample_amount_other =  form.sample_amount_used.to_f / 100 * results[:amount_other_pct] if fields.index('sample_amount_other')
+          end.submit
+          puts _response.body if debug
+        end
+      else
+        puts "#{sample_id} not found" if debug
+      end
+    end
+
+    def update_results(sample_id, results = {})
+      agent.get("#{configuration.base_uri}#{BioTrackTHC::UPDATE_RESULTS}#{sample_id}") do |page|
+        _response = page.form_with(name: 'addlicensee', method: 'POST') do |form|
+          fields = form.fields.map(&:name)
+          form.id = sample_id
+          form.submit = 1
+          form.page1_moisture = results[:b_moisture] if fields.index('page1_moisture')
+          form.page2_THC = results[:c_thc] if fields.index('page2_THC')
+          form.page2_THCA = results[:c_thca] if fields.index('page2_THCA')
+          form.total_thc = results[:c_thc] + (0.877 * results[:c_thca]) if fields.index('total_thc')
+          form.page2_CBD = results[:c_cbd] if fields.index('page2_CBD')
+          form.page2_CBDA = results[:c_cbda] if fields.index('page2_CBDA')
+          form.total_cbd = results[:c_cbd] + (0.877 * results[:c_cbda]) if fields.index('total_cbd')
+          form.send(:'page2_Total Cannabinoids', form.total_thc + form.total_cbd) if fields.index('page2_Total Cannabinoids')
+          form.page3_Stems = results[:v_stems] if fields.index('page3_Stems')
+          form.page3_Other = results[:v_other] if fields.index('page3_Other')
+          form.page4_aerobic_bacteria = results[:m_aerobic_count] if fields.index('page4_aerobic_bacteria')
+          form.page4_yeast_and_mold = results[:m_yeast_mold] if fields.index('page4_yeast_and_mold')
+          form.page4_coliforms = results[:m_total_coliform] if fields.index('page4_coliforms')
+          form.page4_bile_tolerant = results[:m_btgn_bacteria] if fields.index('page4_bile_tolerant')
+          form.page4_e_coli_and_salmonella = results[:m_ecoli] + results[:m_salmonella] if fields.index('page4_e_coli_and_salmonella')
+          form.page6_total_mycotoxins = results[:mycotoxins_pass] if fields.index('page6_total_mycotoxins')
+          form.sample_amount_destroyed = form.sample_amount_used.to_f / 100 * results[:amount_destroyed_pct] if fields.index('sample_amount_destroyed')
+          form.sample_amount_other =  form.sample_amount_used.to_f / 100 * results[:amount_other_pct] if fields.index('sample_amount_other')
+        end
+        puts _response if debug
+        _response.submit
       end
     end
 

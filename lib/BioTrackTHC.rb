@@ -12,7 +12,8 @@ module BioTrackTHC
   LICENSE_SEARCH  = '/qasearchreturn.asp?l='.freeze
   SAMPLE_SEARCH   = '/qasearchreturn_lot.asp?l='.freeze
   SAMPLE_RECEIVE  = '/labtestreceive.asp?id='.freeze
-  SAMPLE_RESULTS  = '/labtestresult.asp?id='.freeze
+  CREATE_RESULTS  = '/labtestresult.asp?id='.freeze
+  UPDATE_RESULTS  = '/labtestresult_modify.asp?id='.freeze
   RECEIVE_PAGE    = '/labtestreceive.asp?id='.freeze
 
   # https://wslcb.mjtraceability.com/
