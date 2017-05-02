@@ -13,6 +13,7 @@ module BioTrackTHC
 
     def sample_search(sample_id)
       agent.get("#{configuration.base_uri}#{Constants::API::SAMPLE_SEARCH}#{sample_id}") do |xml|
+        self.response = nil
         if data = xml.search('data')
           self.response  = Base64.decode64(data.children.to_s)
           puts response if debug
@@ -29,6 +30,7 @@ module BioTrackTHC
 
     def license_search(license_id)
       agent.get("#{configuration.base_uri}#{Constants::API::LICENSE_SEARCH}#{license_id}") do |xml|
+        self.response = nil
         if data = xml.search('data')
           self.response  = Base64.decode64(data.children.to_s)
           puts response if debug
