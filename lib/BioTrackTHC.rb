@@ -5,6 +5,7 @@ require "BioTrackTHC/version"
 
 module BioTrackTHC
   LOGIN_PAGE = '/qlogin.asp'.freeze
+  QA_SEARCH = '/qasearch.asp?name_startsWith='.freeze
   LICENSE_SEARCH = '/qasearchreturn.asp?l='.freeze
   SAMPLE_SEARCH = '/qasearchreturn_lot.asp?l='.freeze
   SAMPLE_RECEIVE = '/labtestreceive.asp?id='.freeze
