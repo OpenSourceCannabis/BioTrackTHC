@@ -22,4 +22,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'bundler', '~> 1.11'
   spec.add_dependency 'rake', '~> 0.9.2.2'
   spec.add_dependency 'rspec', '~> 3.0'
+
+  spec.add_development_dependency 'pry'
 end
