@@ -24,5 +24,28 @@ module BioTrackTHC
       UPDATE_RESULTS  = '/labtestresult_modify.asp?id='.freeze
       RECEIVE_PAGE    = '/labtestreceive.asp?id='.freeze
     end
+
+    ANALITES = [
+      :b_moisture,
+      :c_thc,
+      :c_thca,
+      :c_thc,
+      :c_cbd,
+      :c_cbda,
+      :c_cbd,
+      :v_stems,
+      :v_other,
+      :m_aerobic_count,
+      :m_yeast_mold,
+      :m_total_coliform,
+      :m_btgn_bacteria,
+      :m_ecoli,
+      :mycotoxins_pass,
+      :pesticide_pass,
+      :heavy_metal_pass,
+      :amount_destroyed_pct,
+      :amount_other_pct
+    ]
+
   end
 end
