@@ -12,7 +12,8 @@ module BioTrackTHC
     end
 
     def sample_search(sample_id)
-      agent.get("#{configuration.base_uri}#{BioTrackTHC::SAMPLE_SEARCH}#{sample_id}") do |xml|
+      agent.get("#{configuration.base_uri}#{Constants::API::SAMPLE_SEARCH}#{sample_id}") do |xml|
+        self.response = nil
         if data = xml.search('data')
           self.response  = Base64.decode64(data.children.to_s)
           puts response if debug
@@ -28,7 +29,8 @@ module BioTrackTHC
     end
 
     def license_search(license_id)
-      agent.get("#{configuration.base_uri}#{BioTrackTHC::LICENSE_SEARCH}#{license_id}") do |xml|
+      agent.get("#{configuration.base_uri}#{Constants::API::LICENSE_SEARCH}#{license_id}") do |xml|
+        self.response = nil
         if data = xml.search('data')
           self.response  = Base64.decode64(data.children.to_s)
           puts response if debug
@@ -44,7 +46,7 @@ module BioTrackTHC
     end
 
     def licensee_search(query)
-      agent.get("#{configuration.base_uri}#{BioTrackTHC::LICENSEE_SEARCH}#{query}") do |response|
+      agent.get("#{configuration.base_uri}#{Constants::API::LICENSEE_SEARCH}#{query}") do |response|
         self.licensees = JSON.parse(response.body)['items']
         licensees.any?
       end
@@ -57,7 +59,7 @@ module BioTrackTHC
         parsed_response
           .find{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Receive Sample' }
       if _sample
-        agent.get("#{configuration.base_uri}#{BioTrackTHC::RECEIVE_PAGE}#{_sample[:id]}") do |page|
+        agent.get("#{configuration.base_uri}#{Constants::API::RECEIVE_PAGE}#{_sample[:id]}") do |page|
           _response = page.form_with(name: 'addlicensee', method: 'POST') do |form|
             form.id = _sample[:id]
             form.submit = 1
@@ -76,7 +78,7 @@ module BioTrackTHC
         parsed_response
           .find{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Add Results'}
       if _sample
-        agent.get("#{configuration.base_uri}#{BioTrackTHC::CREATE_RESULTS}#{_sample[:id]}") do |page|
+        agent.get("#{configuration.base_uri}#{Constants::API::CREATE_RESULTS}#{_sample[:id]}") do |page|
           _response = page.form_with(name: 'addlicensee', method: 'POST') do |form|
             setup_results(form, results)
           end.submit
@@ -88,7 +90,7 @@ module BioTrackTHC
     end
 
     def update_results(sample_id, results = {})
-      agent.get("#{configuration.base_uri}#{BioTrackTHC::UPDATE_RESULTS}#{sample_id}") do |page|
+      agent.get("#{configuration.base_uri}#{Constants::API::UPDATE_RESULTS}#{sample_id}") do |page|
         _response = page.form_with(name: 'addlicensee', method: 'POST') do |form|
           setup_results(form, results)
         end
@@ -173,7 +175,7 @@ module BioTrackTHC
 
     def sign_in
       raise Errors::MissingConfiguration if configuration.incomplete?
-      agent.get(configuration.base_uri + BioTrackTHC::LOGIN_PAGE) do |wslcb_page|
+      agent.get(configuration.base_uri + Constants::API::LOGIN_PAGE) do |wslcb_page|
         _response = wslcb_page.form_with(name: 'clogin', method: 'POST') do |form|
           form.username  = configuration.username
           form.password = configuration.password
