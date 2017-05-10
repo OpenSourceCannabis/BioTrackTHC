@@ -14,6 +14,7 @@ module BioTrackTHC
     def sample_search(sample_id)
       agent.get("#{configuration.base_uri}#{Constants::API::SAMPLE_SEARCH}#{sample_id}") do |xml|
         self.response = nil
+        self.parsed_response = []
         if data = xml.search('data')
           self.response  = Base64.decode64(data.children.to_s)
           puts response if debug
@@ -96,6 +97,20 @@ module BioTrackTHC
         end
         puts _response if debug
         _response.submit
+      end
+    end
+
+    def form_fields(sample_id)
+      sample_search(sample_id) unless sample_available?(sample_id)
+      _sample =
+        parsed_response
+          .find{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Add Results'}
+      if _sample
+        agent.get("#{configuration.base_uri}#{Constants::API::CREATE_RESULTS}#{_sample[:id]}") do |page|
+          page.forms[0].fields.find_all{|z| z.type == 'text'}.map(&:name)
+        end
+      else
+        []
       end
     end
 

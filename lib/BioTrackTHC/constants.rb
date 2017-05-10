@@ -25,27 +25,25 @@ module BioTrackTHC
       RECEIVE_PAGE    = '/labtestreceive.asp?id='.freeze
     end
 
-    ANALITES = [
-      :b_moisture,
-      :c_thc,
-      :c_thca,
-      :c_thc,
-      :c_cbd,
-      :c_cbda,
-      :c_cbd,
-      :v_stems,
-      :v_other,
-      :m_aerobic_count,
-      :m_yeast_mold,
-      :m_total_coliform,
-      :m_btgn_bacteria,
-      :m_ecoli,
-      :mycotoxins_pass,
-      :pesticide_pass,
-      :heavy_metal_pass,
-      :amount_destroyed_pct,
-      :amount_other_pct
-    ]
+    ANALITES = {
+      b_moisture: 'page1_moisture',
+      c_thc: 'page2_THC',
+      c_thca: 'page2_CBDA',
+      c_cbd: 'page2_CBD',
+      c_cbda: 'page2_CBDA',
+      v_stems: 'page3_Stems',
+      v_other: 'page3_Other',
+      m_aerobic_count: 'page4_aerobic_bacteria',
+      m_yeast_mold: 'page4_yeast_and_mold',
+      m_total_coliform: 'page4_coliforms',
+      m_btgn_bacteria: 'page4_bile_tolerant',
+      m_ecoli: 'page4_e_coli_and_salmonella',
+      mycotoxins_pass: 'page6_total_mycotoxins',
+      pesticide_pass: 'page7_pesticide_screening',
+      heavy_metal_pass: 'page8_heavy_metal',
+      amount_destroyed_pct: 'sample_amount_destroyed',
+      amount_other_pct: 'sample_amount_other'
+    }
 
   end
 end
