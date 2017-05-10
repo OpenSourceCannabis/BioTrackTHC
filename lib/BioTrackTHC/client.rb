@@ -106,9 +106,8 @@ module BioTrackTHC
         parsed_response
           .find{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Add Results'}
       if _sample
-        agent.get("#{configuration.base_uri}#{Constants::API::CREATE_RESULTS}#{_sample[:id]}") do |page|
-          page.forms[0].fields.find_all{|z| z.type == 'text'}.map(&:name)
-        end
+        page = agent.get("#{configuration.base_uri}#{Constants::API::CREATE_RESULTS}#{_sample[:id]}")
+        page.forms[0].fields.find_all{|z| z.type == 'text'}.map(&:name)
       else
         []
       end
