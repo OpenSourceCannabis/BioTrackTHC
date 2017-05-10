@@ -11,7 +11,7 @@ module BioTrackTHC
       sign_in
     end
 
-    def sample_search(sample_id)
+    def search_sample(sample_id)
       agent.get("#{configuration.base_uri}#{Constants::API::SAMPLE_SEARCH}#{sample_id}") do |xml|
         self.response = nil
         self.parsed_response = []
@@ -29,7 +29,7 @@ module BioTrackTHC
       end
     end
 
-    def license_search(license_id)
+    def search_license(license_id)
       agent.get("#{configuration.base_uri}#{Constants::API::LICENSE_SEARCH}#{license_id}") do |xml|
         self.response = nil
         if data = xml.search('data')
@@ -46,16 +46,16 @@ module BioTrackTHC
       end
     end
 
-    def licensee_search(query)
+    def search_licensee(query)
       agent.get("#{configuration.base_uri}#{Constants::API::LICENSEE_SEARCH}#{query}") do |response|
         self.licensees = JSON.parse(response.body)['items']
         licensees.any?
       end
     end
 
-    def sample_receive(sample_id, pct=1)
+    def receive_sample(sample_id, pct=1)
       pct = 1 if pct > 1
-      sample_search(sample_id) unless sample_available?(sample_id)
+      search_sample(sample_id) unless sample_available?(sample_id)
       _sample =
         parsed_response
           .find{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Receive Sample' }
@@ -74,7 +74,7 @@ module BioTrackTHC
     end
 
     def create_results(sample_id, results = {})
-      sample_search(sample_id) unless sample_available?(sample_id)
+      receive_sample(sample_id) unless sample_available?(sample_id)
       _sample =
         parsed_response
           .find{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Add Results'}
@@ -101,7 +101,7 @@ module BioTrackTHC
     end
 
     def form_fields(sample_id)
-      sample_search(sample_id) unless sample_available?(sample_id)
+      search_sample(sample_id) unless sample_available?(sample_id)
       _sample =
         parsed_response
           .find{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Add Results'}
@@ -111,6 +111,22 @@ module BioTrackTHC
       else
         []
       end
+    end
+
+    def can_receive_sample?(sample_id)
+      parsed_response &&
+      parsed_response
+        .any?{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Receive Sample'}
+    end
+
+    def can_create_results?(sample_id)
+      parsed_response &&
+      parsed_response
+        .any?{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Add Results'}
+    end
+
+    def can_update_results?
+      false
     end
 
     private

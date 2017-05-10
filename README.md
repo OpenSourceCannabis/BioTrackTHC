@@ -12,10 +12,10 @@ end
 
 client = BioTrackTHC::Client.new(debug: true)
 
-client.sample_search('0199 2612 0934 4923')
+client.search_sample('0199 2612 0934 4923')
 client.parsed_response
 
-client.license_search('980221')
+client.search_license('980221')
 ```
 
 ## License
