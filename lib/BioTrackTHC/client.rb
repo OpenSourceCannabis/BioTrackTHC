@@ -116,7 +116,7 @@ module BioTrackTHC
       if _sample
         page = agent.get("#{configuration.base_uri}#{Constants::API::CREATE_RESULTS}#{_sample[:id]}")
         self.sample_amount_used = page.forms[0].fields.find{|z| z.name == 'sample_amount_used'}.value
-        page.forms[0].fields.find_all{|z| z.type == 'text'}.map(&:name)
+        page.forms[0].fields.find_all{|z| z.type == 'text' || z.type.nil? }.map(&:name)
       else
         []
       end
