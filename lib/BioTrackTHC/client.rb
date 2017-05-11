@@ -73,9 +73,8 @@ module BioTrackTHC
       end
     end
 
-    def receive_sample(sample_id, pct=1)
+    def receive_sample(sample_id, receive_quantity)
       sign_in unless signed_in?
-      pct = 1 if pct > 1
       search_sample(sample_id) unless sample_available?(sample_id)
       _sample =
         parsed_response
@@ -85,7 +84,7 @@ module BioTrackTHC
           _response = page.form_with(name: 'addlicensee', method: 'POST') do |form|
             form.id = _sample[:id]
             form.submit = 1
-            form.receive_quantity = _sample[:quantity].to_f * pct
+            form.receive_quantity = receive_quantity
           end.submit
           puts _response.body if debug
         end
