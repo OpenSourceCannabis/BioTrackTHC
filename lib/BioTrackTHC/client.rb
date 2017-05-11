@@ -3,7 +3,13 @@ module BioTrackTHC
   include Errors
 
   class Client
-    attr_accessor :agent, :debug, :response, :parsed_response, :licensees, :sample_id
+    attr_accessor :agent,
+                  :debug, 
+                  :response, 
+                  :parsed_response, 
+                  :licensees, 
+                  :sample_id, 
+                  :sample_amount_used
     def initialize(opts = {})
       self.agent = Mechanize.new { |agent| agent.follow_meta_refresh = true }
       self.agent.user_agent_alias = 'Windows IE 9'
@@ -108,6 +114,7 @@ module BioTrackTHC
           .find{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Add Results'}
       if _sample
         page = agent.get("#{configuration.base_uri}#{Constants::API::CREATE_RESULTS}#{_sample[:id]}")
+        self.sample_amount_used = page.forms[0].fields.find{|z| z.name == 'sample_amount_used'}.value
         page.forms[0].fields.find_all{|z| z.type == 'text'}.map(&:name)
       else
         []
