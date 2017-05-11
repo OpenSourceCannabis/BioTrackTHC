@@ -12,6 +12,7 @@ module BioTrackTHC
       SAMPLE_ID_OFFSET       = 0
       LOT_ID_OFFSET          = 2
       DATA_OFFSET            = 2
+      SHIPPED_QUANTITY       = 'table:nth-child(1) > tr:nth-child(1) > td:nth-child(2)'
     end
 
     module API

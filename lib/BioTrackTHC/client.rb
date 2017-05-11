@@ -9,7 +9,8 @@ module BioTrackTHC
                   :parsed_response,
                   :licensees,
                   :sample_id,
-                  :sample_amount_used
+                  :sample_amount_used,
+                  :sample_amount_shipped
     def initialize(opts = {})
       self.agent = Mechanize.new { |agent| agent.follow_meta_refresh = true }
       self.agent.user_agent_alias = 'Windows IE 9'
@@ -108,7 +109,21 @@ module BioTrackTHC
       end
     end
 
-    def form_fields(sample_id)
+    def receive_form_fields(sample_id)
+      search_sample(sample_id) unless sample_available?(sample_id)
+      _sample =
+        parsed_response
+          .find{|el| el[:sample_id].gsub(/\D/,'') == sample_id.gsub(/\D/,'') && el[:action] == 'Receive Sample'}
+      if _sample
+        page = agent.get("#{configuration.base_uri}#{Constants::API::RECEIVE_PAGE}#{_sample[:id]}")
+        self.sample_amount_shipped = page.at(Constants::ResponsePage::SHIPPED_QUANTITY).text
+        page.forms[0].fields.find_all{|z| z.type == 'text' || z.type.nil? }.map(&:name)
+      else
+        []
+      end
+    end
+
+    def results_form_fields(sample_id)
       search_sample(sample_id) unless sample_available?(sample_id)
       _sample =
         parsed_response
