@@ -4,11 +4,11 @@ module BioTrackTHC
 
   class Client
     attr_accessor :agent,
-                  :debug, 
-                  :response, 
-                  :parsed_response, 
-                  :licensees, 
-                  :sample_id, 
+                  :debug,
+                  :response,
+                  :parsed_response,
+                  :licensees,
+                  :sample_id,
                   :sample_amount_used
     def initialize(opts = {})
       self.agent = Mechanize.new { |agent| agent.follow_meta_refresh = true }
@@ -90,6 +90,7 @@ module BioTrackTHC
           _response = page.form_with(name: 'addlicensee', method: 'POST') do |form|
             setup_results(form, results)
           end.submit
+          true
           puts _response.body if debug
         end
       else
@@ -143,26 +144,26 @@ module BioTrackTHC
 
     def setup_results(form, results)
       fields = form.fields.map(&:name)
-      form.page1_moisture = results[:b_moisture] if fields.index('page1_moisture')
-      form.page2_THC = results[:c_thc] if fields.index('page2_THC')
-      form.page2_THCA = results[:c_thca] if fields.index('page2_THCA')
-      form.total_thc = results[:c_thc] + (0.877 * results[:c_thca]) if fields.index('total_thc')
-      form.page2_CBD = results[:c_cbd] if fields.index('page2_CBD')
-      form.page2_CBDA = results[:c_cbda] if fields.index('page2_CBDA')
-      form.total_cbd = results[:c_cbd] + (0.877 * results[:c_cbda]) if fields.index('total_cbd')
-      form.send(:'page2_Total Cannabinoids', form.total_thc + form.total_cbd) if fields.index('page2_Total Cannabinoids')
-      form.page3_Stems = results[:v_stems] if fields.index('page3_Stems')
-      form.page3_Other = results[:v_other] if fields.index('page3_Other')
-      form.page4_aerobic_bacteria = results[:m_aerobic_count] if fields.index('page4_aerobic_bacteria')
-      form.page4_yeast_and_mold = results[:m_yeast_mold] if fields.index('page4_yeast_and_mold')
-      form.page4_coliforms = results[:m_total_coliform] if fields.index('page4_coliforms')
-      form.page4_bile_tolerant = results[:m_btgn_bacteria] if fields.index('page4_bile_tolerant')
-      form.page4_e_coli_and_salmonella = results[:m_ecoli] + results[:m_salmonella] if fields.index('page4_e_coli_and_salmonella')
-      form.page6_total_mycotoxins = results[:mycotoxins_pass] if fields.index('page6_total_mycotoxins')
-      form.page7_pesticide_screening = results[:pesticide_pass] if fields.index('page7_pesticide_screening')
-      form.page8_heavy_metal = results[:heavy_metal_pass] if fields.index('page8_heavy_metal')
-      form.sample_amount_destroyed = form.sample_amount_used.to_f / 100 * results[:amount_destroyed_pct] if fields.index('sample_amount_destroyed')
-      form.sample_amount_other =  form.sample_amount_used.to_f / 100 * results[:amount_other_pct] if fields.index('sample_amount_other')
+      form.page1_moisture = results[:page1_moisture] if fields.index('page1_moisture')
+      form.page2_THC = results[:page2_THC] if fields.index('page2_THC')
+      form.page2_THCA = results[:page2_THCA] if fields.index('page2_THCA')
+      form.total_thc = results[:page2_THC].to_f + (0.877 * results[:page2_THCA].to_f) if fields.index('total_thc')
+      form.page2_CBD = results[:page2_CBD] if fields.index('page2_CBD')
+      form.page2_CBDA = results[:page2_CBDA] if fields.index('page2_CBDA')
+      form.total_cbd = results[:page2_CBD].to_f + (0.877 * results[:page2_CBDA].to_f) if fields.index('total_cbd')
+      form.send(:'page2_Total Cannabinoids', form.total_thc.to_f + form.total_cbd.to_f) if fields.index('page2_Total Cannabinoids')
+      form.page3_Stems = results[:page3_Stems] if fields.index('page3_Stems')
+      form.page3_Other = results[:page3_Other] if fields.index('page3_Other')
+      form.page4_aerobic_bacteria = results[:page4_aerobic_bacteria] if fields.index('page4_aerobic_bacteria')
+      form.page4_yeast_and_mold = results[:page4_yeast_and_mold] if fields.index('page4_yeast_and_mold')
+      form.page4_coliforms = results[:page4_coliforms] if fields.index('page4_coliforms')
+      form.page4_bile_tolerant = results[:page4_bile_tolerant] if fields.index('page4_bile_tolerant')
+      form.page4_e_coli_and_salmonella = results[:page4_e_coli_and_salmonella] if fields.index('page4_e_coli_and_salmonella')
+      form.page6_total_mycotoxins = results[:page6_total_mycotoxins] if fields.index('page6_total_mycotoxins')
+      form.page7_pesticide_screening = results[:page7_pesticide_screening] if fields.index('page7_pesticide_screening')
+      form.page8_heavy_metal = results[:page8_heavy_metal] if fields.index('page8_heavy_metal')
+      form.sample_amount_destroyed = results[:sample_amount_destroyed] if fields.index('sample_amount_destroyed')
+      form.sample_amount_other =  results[:sample_amount_other] if fields.index('sample_amount_other')
     end
 
     def sample_available?(sample_id)
