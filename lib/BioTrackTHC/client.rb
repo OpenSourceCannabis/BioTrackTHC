@@ -11,6 +11,7 @@ module BioTrackTHC
                   :sample_id,
                   :sample_amount_used,
                   :sample_amount_shipped
+
     def initialize(opts = {})
       self.agent = Mechanize.new { |agent| agent.follow_meta_refresh = true }
       self.agent.user_agent_alias = 'Windows IE 9'
@@ -21,8 +22,11 @@ module BioTrackTHC
     def search_sample(sample_id)
       self.sample_id = sample_id
       agent.get("#{configuration.base_uri}#{Constants::API::SAMPLE_SEARCH}#{sample_id}") do |xml|
+        sign_in if xml.uri.path == '/redirect.html'
+
         self.response = nil
         self.parsed_response = []
+
         if data = xml.search('data')
           self.response  = Base64.decode64(data.children.to_s)
           puts response if debug
@@ -30,6 +34,7 @@ module BioTrackTHC
           puts "BioTrackTHC: sample_id #{sample_id} not found" if debug
         end
       end
+
       if response =~ /myaddreceive|myaddresults/
         parse_search_response
       else
@@ -39,7 +44,10 @@ module BioTrackTHC
 
     def search_license(license_id)
       agent.get("#{configuration.base_uri}#{Constants::API::LICENSE_SEARCH}#{license_id}") do |xml|
+        sign_in if xml.uri.path == '/redirect.html'
+
         self.response = nil
+
         if data = xml.search('data')
           self.response  = Base64.decode64(data.children.to_s)
           puts response if debug
@@ -47,6 +55,7 @@ module BioTrackTHC
           puts "BioTrackTHC: license_id #{sample_id} not found" if debug
         end
       end
+
       if response =~ /myaddreceive|myaddresults/
         parse_search_response
       else
@@ -55,13 +64,17 @@ module BioTrackTHC
     end
 
     def search_licensee(query)
+      self.licensees = []
       agent.get("#{configuration.base_uri}#{Constants::API::LICENSEE_SEARCH}#{query}") do |response|
+        sign_in if response.uri.path == '/redirect.html'
+
         self.licensees = JSON.parse(response.body)['items']
         licensees.any?
       end
     end
 
     def receive_sample(sample_id, pct=1)
+      sign_in unless signed_in?
       pct = 1 if pct > 1
       search_sample(sample_id) unless sample_available?(sample_id)
       _sample =
@@ -82,6 +95,7 @@ module BioTrackTHC
     end
 
     def create_results(sample_id, results = {})
+      sign_in unless signed_in?
       receive_sample(sample_id) unless sample_available?(sample_id)
       _sample =
         parsed_response
@@ -100,6 +114,7 @@ module BioTrackTHC
     end
 
     def update_results(sample_id, results = {})
+      sign_in unless signed_in?
       agent.get("#{configuration.base_uri}#{Constants::API::UPDATE_RESULTS}#{sample_id}") do |page|
         _response = page.form_with(name: 'addlicensee', method: 'POST') do |form|
           setup_results(form, results)
@@ -110,6 +125,7 @@ module BioTrackTHC
     end
 
     def receive_form_fields(sample_id)
+      sign_in unless signed_in?
       search_sample(sample_id) unless sample_available?(sample_id)
       _sample =
         parsed_response
@@ -124,6 +140,7 @@ module BioTrackTHC
     end
 
     def results_form_fields(sample_id)
+      sign_in unless signed_in?
       search_sample(sample_id) unless sample_available?(sample_id)
       _sample =
         parsed_response
@@ -153,6 +170,11 @@ module BioTrackTHC
 
     def can_update_results?
       false
+    end
+
+    def signed_in?
+      page = agent.get("#{configuration.base_uri}#{Constants::API::HOME_PAGE}")
+      page.uri.path != '/redirect.html'
     end
 
     private

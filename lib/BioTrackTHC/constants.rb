@@ -16,6 +16,7 @@ module BioTrackTHC
     end
 
     module API
+      HOME_PAGE       = '/labtesting.asp'.freeze
       LOGIN_PAGE      = '/qlogin.asp'.freeze
       LICENSEE_SEARCH = '/qasearch.asp?style=full&maxRows=10&name_startsWith='.freeze
       LICENSE_SEARCH  = '/qasearchreturn.asp?l='.freeze
