@@ -194,7 +194,7 @@ module BioTrackTHC
       form.page2_CBD_units = 1 if fields.index('page2_CBD_units')
       form.page2_CBDA_units = 1 if fields.index('page2_CBDA_units')
       form.total_cbd_units = 1 if fields.index('total_cbd_units')
-      form.send(:'page2_Total Cannabinoids_units', 1) if fields.index('page2_Total Cannabinoids')
+      form.send(:'page2_Total Cannabinoids_units', 1) if fields.index('page2_Total Cannabinoids_units')
       form.page3_Stems = results[:page3_Stems] if fields.index('page3_Stems')
       form.page3_Other = results[:page3_Other] if fields.index('page3_Other')
       form.page4_aerobic_bacteria = results[:page4_aerobic_bacteria] if fields.index('page4_aerobic_bacteria')
