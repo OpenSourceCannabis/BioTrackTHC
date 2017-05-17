@@ -265,7 +265,11 @@ module BioTrackTHC
           form.username  = configuration.username
           form.password = configuration.password
           form.license = configuration.license
-          form.radiobutton_with(id: 'mode2').check if configuration.training
+          if configuration.training
+            form.radiobutton_with(id: 'mode2').check
+          else
+            form.radiobutton_with(id: 'mode1').check
+          end
         end.submit
         puts _response if debug
       end
