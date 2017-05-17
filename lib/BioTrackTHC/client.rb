@@ -202,6 +202,7 @@ module BioTrackTHC
       form.page4_coliforms = results[:page4_coliforms] if fields.index('page4_coliforms')
       form.page4_bile_tolerant = results[:page4_bile_tolerant] if fields.index('page4_bile_tolerant')
       form.page4_e_coli_and_salmonella = results[:page4_e_coli_and_salmonella] if fields.index('page4_e_coli_and_salmonella')
+      form.send(:'page5_Residual Solvent', results[:page5_Residual_Solvent]) if fields.index('page5_Residual Solvent')
       form.page6_total_mycotoxins = results[:page6_total_mycotoxins] if fields.index('page6_total_mycotoxins')
       form.page7_pesticide_screening = results[:page7_pesticide_screening] if fields.index('page7_pesticide_screening')
       form.page8_heavy_metal = results[:page8_heavy_metal] if fields.index('page8_heavy_metal')
@@ -264,7 +265,7 @@ module BioTrackTHC
           form.username  = configuration.username
           form.password = configuration.password
           form.license = configuration.license
-          form.radiobutton_with(id: 'mode2').check
+          form.radiobutton_with(id: 'mode2').check if configuration.training
         end.submit
         puts _response if debug
       end
