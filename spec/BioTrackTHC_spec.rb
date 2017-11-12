@@ -27,7 +27,8 @@ describe BioTrackTHC do
       config.username = 'info@example.com'
       config.password = '987987987'
       config.license = '980000225'
-      config.base_uri = 'https://wslcb.mjtraceability.com'
+      config.base_uri = 'https://wa.biotrackthc.net/'
+      config.state = :wa
     end
     expect { BioTrackTHC::Client.new() }
       .not_to raise_error
